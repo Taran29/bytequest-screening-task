@@ -22,9 +22,12 @@ router.get('/', async (req, res) => {
 })
 
 router.get('/page', async (req, res) => {
-  let pageNumber = parseInt(req.query.pageNumber)
+  let pageNumber
+  if (!req.query.pageNumber) pageNumber = 1
+
+  pageNumber = parseInt(req.query.pageNumber)
   if (isNaN(pageNumber)) {
-    return res.status(400).send({ message: 'Page number needs to be a number.' })
+    pageNumber = 1
   }
 
   const pageSize = 5
@@ -79,8 +82,11 @@ router.post('/', async (req, res) => {
   })
 
   try {
-    await product.save()
-    res.status(200).send({ message: `${product.title} saved successfully` })
+    const result = await product.save()
+    res.status(200).send({
+      message: `${product.title} saved successfully`,
+      product: result
+    })
   } catch (ex) {
     res.status(502).send({ message: 'Could not connect to the database right now. Please try again later.' })
   }
